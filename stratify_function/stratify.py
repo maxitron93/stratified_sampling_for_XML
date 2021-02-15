@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime
 import helper_funcs
 
-def stratified_train_test_split(X, y, target_test_size, random_state=None):
+def stratified_train_test_split(X, y, target_test_size, random_state=None, epochs=50, swap_probability=0.1, threshold_proportion=0.1, decay=0.1):
 
     if random_state != None:
         random.seed(random_state)
@@ -51,17 +51,17 @@ def stratified_train_test_split(X, y, target_test_size, random_state=None):
     print(f'Starting score: {round(total_score)}. Calculated in {str(datetime.now() - start_time).split(".")[0]}')
 
     # Main loop to create stratified train-test split  
-    for i in range(50):
+    for epoch in range(epochs):
         
         # To keep track of how long each itteration takes
         itteration_start_time = datetime.now()
         
         # 6. Calculate the threshold score for swapping
-        threshold_score = helper_funcs.calculte_threshold_score(instances_dict, average_labels_per_instance, i)
+        threshold_score = helper_funcs.calculte_threshold_score(instances_dict, average_labels_per_instance, epoch, threshold_proportion, decay)
 
         # 7. Swap the instances with instance_score that is greater than the threshold score
         # Probability of swapping an instance is swap_probability
-        helper_funcs.swap_instances(instances_dict, threshold_score, swap_counter, target_test_size, average_labels_per_instance, i)
+        helper_funcs.swap_instances(instances_dict, threshold_score, swap_counter, target_test_size, average_labels_per_instance, epoch, swap_probability, decay)
 
         # 2. Recreate labels_dict with updated train-test split
         labels_dict = helper_funcs.create_labels_dict(instances_dict)
@@ -74,7 +74,7 @@ def stratified_train_test_split(X, y, target_test_size, random_state=None):
 
         # 5. Recalculate the total score
         total_score = helper_funcs.calculate_total_score(instances_dict)
-        print(f'Epoch {i + 1}/50 score: {round(total_score)}. Calculated in {str(datetime.now() - itteration_start_time).split(".")[0]}')
+        print(f'Epoch {epoch + 1}/{epochs} score: {round(total_score)}. Calculated in {str(datetime.now() - itteration_start_time).split(".")[0]}')
 
     # Prepare X_train, X_test, y_train, y_test
     X_train = []

@@ -102,19 +102,19 @@ def calculate_total_score(instances_dict):
     return total_score
 
 # 6. Calculate the threshold score for swapping
-def calculte_threshold_score(instances_dict, average_labels_per_instance, epoch):
+def calculte_threshold_score(instances_dict, average_labels_per_instance, epoch, threshold_proportion, decay):
     instance_scores = []
     for _, instance_dict in instances_dict.items():
         if instance_dict['instance_score'] < average_labels_per_instance:
             instance_scores.append(instance_dict['instance_score'])
-    threshold_score = np.quantile(instance_scores, (1 - (0.1 / (1.1 ** epoch))))
+    threshold_score = np.quantile(instance_scores, (1 - (threshold_proportion / ((1 + decay) ** epoch))))
     if threshold_score < 0:
         threshold_score = 0
     return threshold_score
 
 # 7. Swap the instances with instance_score that is greater than the threshold score
 # Probability of swapping an instance is swap_probability
-def swap_instances(instances_dict, threshold_score, swap_counter, target_test_size, average_labels_per_instance, epoch):
+def swap_instances(instances_dict, threshold_score, swap_counter, average_labels_per_instance, epoch, swap_probability, decay):
     for instance_id, instance_dict in instances_dict.items():
         instance_score = instance_dict['instance_score']
         if instance_score >= average_labels_per_instance:
@@ -126,7 +126,7 @@ def swap_instances(instances_dict, threshold_score, swap_counter, target_test_si
                 elif current_group == 'test':
                     instances_dict[instance_id]['train_or_test'] = 'train'
                     swap_counter['to_train'] += 1
-        elif instance_score > threshold_score and random.uniform(0, 1) <= 0.1 / (1.1 ** epoch):
+        elif instance_score > threshold_score and random.uniform(0, 1) <= swap_probability / ((1 + decay) ** epoch):
             current_group = instance_dict['train_or_test']
             if current_group == 'train':
                 instances_dict[instance_id]['train_or_test'] = 'test'
