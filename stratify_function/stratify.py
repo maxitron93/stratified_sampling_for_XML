@@ -61,7 +61,7 @@ def stratified_train_test_split(X, y, target_test_size, random_state=None, epoch
 
         # 7. Swap the instances with instance_score that is greater than the threshold score
         # Probability of swapping an instance is swap_probability
-        helper_funcs.swap_instances(instances_dict, threshold_score, swap_counter, target_test_size, average_labels_per_instance, epoch, swap_probability, decay)
+        helper_funcs.swap_instances(instances_dict, threshold_score, swap_counter, average_labels_per_instance, epoch, swap_probability, decay)
 
         # 2. Recreate labels_dict with updated train-test split
         labels_dict = helper_funcs.create_labels_dict(instances_dict)
